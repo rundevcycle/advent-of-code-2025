@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using log4net;
 
 namespace AoC2025.Day05
 {
     internal class DailyPuzzle05 : DailyPuzzle
     {
+        private static readonly ILog logger = LogManager.GetLogger(typeof(DailyPuzzle05));
+
         private List<Tuple<long, long>> _freshRanges = new();
         private List<long> _ingredients = new();
 
@@ -64,16 +61,13 @@ namespace AoC2025.Day05
                     if (ingredient >= range.Item1 && ingredient <= range.Item2)
                     {
                         numFreshIngredients++;
-                        if (Program.DebugMode)
-                        {
-                            Console.WriteLine($"Ingredient {ingredient} is in the fresh range {range.Item1} - {range.Item2}");
-                        }
+                        logger.Debug($"Ingredient {ingredient} is in the fresh range {range.Item1} - {range.Item2}");
                         break;
                     }
                 }
             }
 
-            Console.WriteLine($"Found {numFreshIngredients} fresh ingredients.");
+            logger.Info($"Found {numFreshIngredients} fresh ingredients.");
         }
 
 
@@ -88,10 +82,7 @@ namespace AoC2025.Day05
                 long first = range.Item1;
                 long last = range.Item2;
 
-                if (Program.DebugMode)
-                {
-                    Console.WriteLine($"Checking range {first}-{last}...");
-                }
+                logger.Debug($"Checking range {first}-{last}...");
 
                 bool alreadyCovered = false;
                 foreach (var otherRange in freshCodeRanges.OrderBy(r => r.Item1))
@@ -105,7 +96,7 @@ namespace AoC2025.Day05
                     if (first >= otherRange.Item1 && last <= otherRange.Item2)
                     {
                         alreadyCovered = true;
-                        if (Program.DebugMode) Console.WriteLine($"    already covered by {otherRange.Item1}-{otherRange.Item2}");
+                        logger.Debug($"    already covered by {otherRange.Item1}-{otherRange.Item2}");
                         continue;
                     }
 
@@ -114,10 +105,7 @@ namespace AoC2025.Day05
                         && last > otherRange.Item2)
                     {
                         first = otherRange.Item2 + 1;
-                        if (Program.DebugMode)
-                        {
-                            Console.WriteLine($"    First is in range {otherRange.Item1}-{otherRange.Item2}.  First is now {first}.");
-                        }
+                        logger.Debug($"    First is in range {otherRange.Item1}-{otherRange.Item2}.  First is now {first}.");
                     }
 
                     // If the last falls within another range, but the first doesn't, update the last of the this range.
@@ -125,53 +113,31 @@ namespace AoC2025.Day05
                         && first < otherRange.Item1)
                     {
                         last = otherRange.Item1 - 1;
-                        if (Program.DebugMode)
-                        {
-                            Console.WriteLine($"    Last is in range {otherRange.Item1}-{otherRange.Item2}.  Last is now {last}.");
-                        }
+                        logger.Debug($"    Last is in range {otherRange.Item1}-{otherRange.Item2}.  Last is now {last}.");
                     }
                 }
 
                 // If the last < first, skip it since we already cover that range.
                 if (last < first)
                 {
-                    if (Program.DebugMode) Console.WriteLine($"    adjusted range is {first}-{last}.  Not a valid range.");
+                    logger.Debug($"    adjusted range is {first}-{last}.  Not a valid range.");
                     continue;
                 }
                 else if (!alreadyCovered)
                 {
-                    if (Program.DebugMode) Console.WriteLine($"    adjusted range is {first}-{last}.  Adding the valid range.");
+                    logger.Debug($"    adjusted range is {first}-{last}.  Adding the valid range.");
                     freshCodeRanges.Add(new Tuple<long, long>(first, last));
                 }
             }
 
             long numDistinctFreshCodes = 0;
-            if (Program.DebugMode) Console.WriteLine("\nFinal fresh ingredient ranges:");
+            logger.Debug("Final fresh ingredient ranges:");
             foreach (var range in freshCodeRanges.Distinct().OrderBy(r => r.Item1))
             {
-                if (Program.DebugMode)
-                {
-                    Console.WriteLine($"    {range.Item1}-{range.Item2}");
-                }
+                logger.Debug($"    {range.Item1}-{range.Item2}");
                 numDistinctFreshCodes += range.Item2 - range.Item1 + 1;
             }
-            Console.WriteLine($"There are {numDistinctFreshCodes} fresh ingredient codes.");
-
-
-
-            /*
-                        foreach (var fresh in _freshRanges)
-                        {
-                            for (long l = fresh.Item1; l <= fresh.Item2; l++)
-                            {
-                                if (!distinctFreshCodes.Contains(l))
-                                {
-                                    distinctFreshCodes.Add(l);
-                                }
-                            }
-                        }
-                        Console.WriteLine($"There are {distinctFreshCodes.Count} fresh ingredient codes.");
-            */
+            logger.Info($"There are {numDistinctFreshCodes} fresh ingredient codes.");
         }
     }
 }

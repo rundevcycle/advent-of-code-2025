@@ -1,61 +1,51 @@
-﻿using System.Diagnostics;
+﻿using log4net;
+using log4net.Config;
+using System.Diagnostics;
 using System.IO;
 
 namespace AoC2025
 {
     internal class Program
     {
-        public static bool DebugMode { get; set; }
+        private static readonly ILog logger = LogManager.GetLogger(typeof(Program));
 
-
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            // Parameters: day#, part#, debug Y/N, and file
+            // Parameters: day#, part#, and file
 
-            if (args.Length < 4)
+            try
             {
-                throw new ArgumentException("Must provide day #, part #, debug (Y/N), and filename.");
-            }
+                XmlConfigurator.Configure(new FileInfo("log4net.config"));
 
-            int day = int.Parse(args[0]);
-            int part = int.Parse(args[1]);
+                if (args.Length < 3)
+                {
+                    logger.Fatal("Must provide day #, part #, and filename.");
+                    return -99;
+                }
 
-            if (args[2].ToUpper() == "Y")
+                int day = int.Parse(args[0]);
+                int part = int.Parse(args[1]);
+
+                string filename = args[2];
+                if (!File.Exists(filename))
+                {
+                    throw new FileNotFoundException($"Unable to locate file: {filename}");
+                }
+
+                List<string> inputData = File.ReadAllText(filename)
+                    .Replace("\r", "")
+                    .Split("\n")
+                    .ToList();
+
+                var dailyPuzzle = DailyPuzzleFactory.Create(day, inputData);
+                dailyPuzzle.Run(part);
+            } 
+            catch (Exception ex)
             {
-                DebugMode = true;
+                logger.Fatal($"Unhandled exception: {ex.Message}", ex);
+                return -1;
             }
-
-            string filename = args[3];
-            if (!File.Exists(filename))
-            {
-                throw new FileNotFoundException($"Unable to locate file: {filename}");
-            }
-
-            List<string> inputData = File.ReadAllText(filename)
-                .Replace("\r", "")
-                .Split("\n")
-                .ToList();
-
-
-            var dailyPuzzle = DailyPuzzleFactory.Create(day, inputData);
-            dailyPuzzle.Run(part);
-
-
-            //switch (part)
-            //{
-            //    case 1:
-            //        var part1 = new Part1(inputData);
-            //        part1.Run();
-            //        break;
-
-            //    case 2:
-            //        var part2 = new Part2(inputData);
-            //        part2.Run();
-            //        break;
-
-            //    default:
-            //        throw new ArgumentException("Invalid part number.");
-            //}
+            return 0;
         }
     }
 }
