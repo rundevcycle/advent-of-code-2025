@@ -15,14 +15,18 @@ namespace AoC2025
 
             Assembly assembly = Assembly.GetExecutingAssembly();
             Type target = assembly.GetTypes()
-                .FirstOrDefault(t => t.IsClass && t.Name.Contains(className));
+                .First(t => t.IsClass && t.Name.Contains(className));
 
             if (target == null) 
             {
                 throw new NotImplementedException($"No class with name {className}");
             }
 
-            object instance = Activator.CreateInstance(target, inputData);
+            object? instance = Activator.CreateInstance(target, inputData);
+            if (instance == null)
+            {
+                throw new NullReferenceException($"Unable to create an instance of {className}.");
+            }
             return (DailyPuzzle) instance;
         }
 
