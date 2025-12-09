@@ -16,6 +16,7 @@ namespace AoC2025
             try
             {
                 XmlConfigurator.Configure(new FileInfo("log4net.config"));
+                logger.Debug("********** START **********");
 
                 if (args.Length < 3)
                 {
@@ -44,6 +45,10 @@ namespace AoC2025
             {
                 logger.Fatal($"Unhandled exception: {ex.Message}", ex);
                 return -1;
+            }
+            finally
+            {
+                logger.Debug("*********** END ***********");
             }
             return 0;
         }
